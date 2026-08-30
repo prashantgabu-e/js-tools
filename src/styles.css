@@ -485,8 +485,25 @@ button {
 }
 
 .message-cell {
+  display: -webkit-box;
+  overflow: hidden;
   color: var(--text);
+  line-clamp: 3;
   line-height: 1.5;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  word-break: break-word;
+}
+
+.ag-theme-quartz .ag-cell {
+  display: flex;
+  align-items: center;
+}
+
+.ag-theme-quartz .ag-cell-wrap-text {
+  align-items: flex-start;
+  padding-top: 0.8rem;
+  padding-bottom: 0.8rem;
 }
 
 .category-text {

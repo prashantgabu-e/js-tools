@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AgGridReact } from "ag-grid-react";
 import type { ColDef, GridApi, GridReadyEvent, ICellRendererParams, IRowNode } from "ag-grid-community";
 import { Download, Search, Upload } from "lucide-react";
@@ -74,6 +74,7 @@ export function SmsAnalyzerPage() {
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const gridApiRef = useRef<GridApi<SmsRow> | null>(null);
+  const filtersRef = useRef<FilterState>(initialFilters);
 
   const senderOptions = useMemo(
     () => Array.from(new Set(smsRows.map((row) => row.address))).sort((a, b) => a.localeCompare(b)),
@@ -141,7 +142,7 @@ export function SmsAnalyzerPage() {
         minWidth: 420,
         flex: 1,
         wrapText: true,
-        autoHeight: true,
+        cellStyle: { whiteSpace: "normal" },
         cellRenderer: (params: ICellRendererParams<SmsRow, string>) => (
           <span className="message-cell">{params.value || ""}</span>
         )
@@ -247,12 +248,26 @@ export function SmsAnalyzerPage() {
     }
   }
 
+  useEffect(() => {
+    filtersRef.current = filters;
+    applyFilters(filters);
+    syncVisibleRows();
+  }, [filters]);
+
+  useEffect(() => {
+    const gridApi = gridApiRef.current;
+    if (!gridApi) {
+      setVisibleRows(smsRows);
+      setTableMeta(smsRows.length ? `${smsRows.length.toLocaleString("en-IN")} records shown.` : "0 records shown.");
+      return;
+    }
+
+    applyFilters(filtersRef.current);
+    syncVisibleRows();
+  }, [smsRows]);
+
   function updateFilters<K extends keyof FilterState>(key: K, value: FilterState[K]) {
-    setFilters((current) => {
-      const next = { ...current, [key]: value };
-      applyFilters(next);
-      return next;
-    });
+    setFilters((current) => ({ ...current, [key]: value }));
   }
 
   async function handleFile(file: File | undefined) {
@@ -291,6 +306,7 @@ export function SmsAnalyzerPage() {
 
   function onGridReady(event: GridReadyEvent<SmsRow>) {
     gridApiRef.current = event.api;
+    applyFilters(filtersRef.current);
     syncVisibleRows();
   }
 
@@ -508,8 +524,10 @@ export function SmsAnalyzerPage() {
         <div className="grid-shell">
           <div className="ag-theme-quartz sms-grid">
             <AgGridReact<SmsRow>
+              theme="legacy"
               columnDefs={columnDefs}
               rowData={smsRows}
+              rowHeight={74}
               defaultColDef={{
                 sortable: true,
                 filter: true,
@@ -523,10 +541,10 @@ export function SmsAnalyzerPage() {
               suppressCellFocus
               quickFilterText={filters.search.trim()}
               isExternalFilterPresent={() =>
-                filters.type !== "all" ||
-                filters.bank !== "all" ||
-                filters.category !== "all" ||
-                filters.sender !== "all"
+                filtersRef.current.type !== "all" ||
+                filtersRef.current.bank !== "all" ||
+                filtersRef.current.category !== "all" ||
+                filtersRef.current.sender !== "all"
               }
               doesExternalFilterPass={(node) => {
                 const row = node.data;
@@ -534,17 +552,20 @@ export function SmsAnalyzerPage() {
                   return true;
                 }
 
+                const activeFilters = filtersRef.current;
                 const matchesType =
-                  filters.type === "all" ||
-                  (filters.type === "transaction" && row.transaction) ||
-                  (filters.type === "non-transaction" && !row.transaction);
-                const matchesBank = filters.bank === "all" || row.bank === filters.bank;
-                const matchesCategory = filters.category === "all" || row.category === filters.category;
-                const matchesSender = filters.sender === "all" || row.address === filters.sender;
+                  activeFilters.type === "all" ||
+                  (activeFilters.type === "transaction" && row.transaction) ||
+                  (activeFilters.type === "non-transaction" && !row.transaction);
+                const matchesBank = activeFilters.bank === "all" || row.bank === activeFilters.bank;
+                const matchesCategory = activeFilters.category === "all" || row.category === activeFilters.category;
+                const matchesSender = activeFilters.sender === "all" || row.address === activeFilters.sender;
 
                 return matchesType && matchesBank && matchesCategory && matchesSender;
               }}
               onGridReady={onGridReady}
+              onRowDataUpdated={syncVisibleRows}
+              onFirstDataRendered={syncVisibleRows}
               onFilterChanged={syncVisibleRows}
               onSortChanged={syncVisibleRows}
               onModelUpdated={syncVisibleRows}

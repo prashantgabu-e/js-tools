@@ -1,5 +1,5 @@
 import type { FormEvent } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CATEGORY_OPTIONS, FINANCE_SHORTCUTS, PAYMENT_OPTIONS, TRANSACTION_TYPE_OPTIONS } from "../constants";
 import { formatLocalDateParts, formatLocalTimeParts } from "../utils/date";
 import { buildSingleFinancePayload, submitFinancePayload } from "../utils/finance";
@@ -30,6 +30,7 @@ export function FinancePage({ iframeName }: FinancePageProps) {
     type: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const amountInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setForm(createInitialState());
@@ -61,6 +62,8 @@ export function FinancePage({ iframeName }: FinancePageProps) {
       message: `Shortcut applied: ${preset.label}. Enter the amount to save.`,
       type: "success"
     });
+    // Keep focus inside the tap/click event so mobile browsers can open the numeric keyboard.
+    amountInputRef.current?.focus();
   }
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -147,6 +150,7 @@ export function FinancePage({ iframeName }: FinancePageProps) {
                 Rs
               </span>
               <input
+                ref={amountInputRef}
                 type="number"
                 inputMode="decimal"
                 min="0"

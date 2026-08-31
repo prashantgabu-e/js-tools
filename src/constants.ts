@@ -11,19 +11,19 @@ export const PAGE_COPY: Record<
   { eyebrow: string; title: string; navLabel: string }
 > = {
   "sms-analyzer": {
-    eyebrow: "Vanilla JS Tools",
-    title: "SMS Tool",
-    navLabel: "SMS Tool"
+    eyebrow: "Your workspace",
+    title: "SMS insights",
+    navLabel: "Insights"
   },
   finance: {
-    eyebrow: "Finance Entry",
-    title: "Add Transaction",
-    navLabel: "Finance"
+    eyebrow: "Money workspace",
+    title: "Add an expense",
+    navLabel: "Add"
   },
   "bulk-finance": {
-    eyebrow: "Finance Entry",
-    title: "Bulk Add Transactions",
-    navLabel: "Bulk Add"
+    eyebrow: "Money workspace",
+    title: "Plan your entries",
+    navLabel: "Plan"
   }
 };
 

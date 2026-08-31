@@ -1,7 +1,7 @@
 import { Menu } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Topbar } from "./components/Topbar";
-import { Sidebar } from "./components/Sidebar";
+import { BottomNavigation, Sidebar } from "./components/Sidebar";
 import { PAGE_COPY, ROUTE_HASHES } from "./constants";
 import { BulkFinancePage } from "./pages/BulkFinancePage";
 import { FinancePage } from "./pages/FinancePage";
@@ -69,6 +69,7 @@ export function App() {
         </div>
         <iframe id="financeSubmitFrame" name="financeSubmitFrame" title="Finance submission handler" hidden />
       </main>
+      <BottomNavigation activeView={currentView} onNavigate={() => setIsSidebarOpen(false)} />
     </div>
   );
 }

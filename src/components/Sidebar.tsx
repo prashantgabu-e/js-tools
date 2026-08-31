@@ -22,8 +22,8 @@ export function Sidebar({ activeView, isOpen, onNavigate }: SidebarProps) {
           <Landmark className="icon" />
         </span>
         <div>
-          <h1 className="brand__title">Vanilla JS Tools</h1>
-          <p>Utility Hub</p>
+          <h1 className="brand__title">Money Manage</h1>
+          <p>Personal finance</p>
         </div>
       </div>
 
@@ -41,5 +41,23 @@ export function Sidebar({ activeView, isOpen, onNavigate }: SidebarProps) {
         ))}
       </nav>
     </aside>
+  );
+}
+
+export function BottomNavigation({ activeView, onNavigate }: Pick<SidebarProps, "activeView" | "onNavigate">) {
+  return (
+    <nav className="bottom-nav" aria-label="Primary navigation">
+      {navItems.map(({ view, icon: Icon }) => (
+        <a
+          key={view}
+          className={`bottom-nav__link${activeView === view ? " active" : ""}`}
+          href={ROUTE_HASHES[view]}
+          onClick={onNavigate}
+        >
+          <Icon className="icon" aria-hidden="true" />
+          <span>{PAGE_COPY[view].navLabel}</span>
+        </a>
+      ))}
+    </nav>
   );
 }

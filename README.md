@@ -1,8 +1,8 @@
-# Vanilla JS Tools
+# Money Manage
 
-Vanilla JS Tools is now a `Vite + React + TypeScript` single-page app that keeps the existing SMS analyzer and finance workflows while moving the project onto a modern frontend stack.
+Money Manage is a `Vite + React + TypeScript` single-page app that keeps the existing SMS analyzer and finance workflows while moving the project onto a modern frontend stack.
 
-Live demo: https://prashantgabu-e.github.io/vanilla-js-tools/
+Live demo: https://prashantgabu-e.github.io/money-manage/
 
 ## Features
 

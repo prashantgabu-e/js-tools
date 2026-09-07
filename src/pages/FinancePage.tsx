@@ -183,11 +183,6 @@ export function FinancePage({ iframeName }: FinancePageProps) {
   return (
     <section className="page-view finance-page page-view--active">
       <section className="panel finance-panel">
-        <div className="finance-heading">
-          <h3>Add Transaction</h3>
-          <p>Quick finance entry with one-tap presets</p>
-        </div>
-
         <form className="finance-form" onSubmit={onSubmit} noValidate>
           <label className="finance-field finance-field--amount">
             <span>Amount</span>
@@ -211,13 +206,9 @@ export function FinancePage({ iframeName }: FinancePageProps) {
 
           <section className="finance-shortcuts" aria-labelledby="financeShortcutTitle">
             <div className="finance-shortcuts__header">
-              <div>
-                <p className="eyebrow" id="financeShortcutTitle">
-                  Quick Fill
-                </p>
-                <h4>Preset shortcuts</h4>
-              </div>
-              <p>Fills everything except amount.</p>
+              <p className="eyebrow" id="financeShortcutTitle">
+                Quick Fill
+              </p>
             </div>
             <div className="finance-shortcut-grid">
               {FINANCE_SHORTCUTS.map((shortcut) => (

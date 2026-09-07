@@ -592,7 +592,7 @@ button {
 
 .finance-panel {
   width: min(100%, 560px);
-  padding: 1rem;
+  padding: 0.8rem;
 }
 
 .bulk-finance-panel {
@@ -691,7 +691,7 @@ button {
 }
 
 .finance-heading {
-  margin-bottom: 0.85rem;
+  margin-bottom: 0.65rem;
 }
 
 .finance-heading h3 {
@@ -706,20 +706,17 @@ button {
 }
 
 .finance-shortcuts {
-  display: grid;
-  gap: 0.75rem;
-  padding: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.6rem;
   border: 1px solid var(--line);
-  border-radius: 18px;
+  border-radius: 12px;
   background: #f7faf6;
 }
 
 .finance-shortcuts__header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.75rem;
-  flex-wrap: wrap;
+  flex: 0 0 auto;
 }
 
 .finance-shortcuts__header h4 {
@@ -741,13 +738,13 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 34px;
-  padding: 0.38rem 0.7rem;
+  min-height: 30px;
+  padding: 0.3rem 0.58rem;
   border: 1px solid rgba(31, 111, 235, 0.14);
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.92);
   color: var(--text);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 700;
   line-height: 1.25;
   white-space: nowrap;
@@ -1129,6 +1126,12 @@ button {
   .finance-panel {
     width: 100%;
     padding: 0.95rem;
+  }
+
+  .finance-shortcuts {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.42rem;
   }
 
   .toolbar > * {

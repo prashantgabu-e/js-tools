@@ -1,5 +1,6 @@
 import type { FormEvent } from "react";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { X } from "lucide-react";
 import {
   CATEGORY_OPTIONS,
   DESCRIPTION_SHORTCUTS_BY_CATEGORY,
@@ -357,9 +358,14 @@ export function FinancePage({ iframeName }: FinancePageProps) {
           </fieldset>
 
           <div className="finance-submit-bar">
-            <p className={`finance-feedback${feedback.type ? ` is-${feedback.type}` : ""}`} role="status" aria-live="polite">
-              {feedback.message}
-            </p>
+            {feedback.message ? (
+              <div className={`finance-feedback${feedback.type ? ` is-${feedback.type}` : ""}`} role="status" aria-live="polite">
+                <p>{feedback.message}</p>
+                <button type="button" className="finance-feedback__clear" onClick={() => setFeedback({ message: "", type: "" })} aria-label="Clear message">
+                  <X className="icon" aria-hidden="true" />
+                </button>
+              </div>
+            ) : null}
             <button className="finance-submit" type="submit" disabled={isSubmitting}>
               {isSubmitting ? "Saving..." : "Save Transaction"}
             </button>

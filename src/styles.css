@@ -1053,6 +1053,35 @@ button {
   color: #b54708;
 }
 
+.finance-feedback {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.55rem;
+}
+
+.finance-feedback p {
+  min-width: 0;
+  margin: 0;
+}
+
+.finance-feedback__clear {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid rgba(22, 33, 51, 0.08);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.72);
+  color: currentColor;
+}
+
+.finance-feedback__clear .icon {
+  width: 15px;
+  height: 15px;
+}
+
 .finance-submit {
   width: 100%;
   min-height: 44px;
@@ -1132,6 +1161,25 @@ button {
     align-items: flex-start;
     flex-direction: column;
     gap: 0.42rem;
+  }
+
+  .finance-form {
+    padding-bottom: 11.5rem;
+  }
+
+  .finance-panel .finance-submit-bar {
+    position: fixed;
+    right: 0.85rem;
+    bottom: calc(max(0.75rem, env(safe-area-inset-bottom)) + 76px);
+    left: 0.85rem;
+    z-index: 39;
+    gap: 0.45rem;
+    padding: 0.65rem;
+    border-radius: 16px;
+  }
+
+  .finance-panel .finance-submit {
+    min-height: 42px;
   }
 
   .toolbar > * {
@@ -1235,6 +1283,10 @@ button {
   .finance-shortcuts,
   .finance-submit-bar {
     padding: 0.8rem;
+  }
+
+  .finance-panel .finance-submit-bar {
+    padding: 0.62rem;
   }
 
   .finance-chip {

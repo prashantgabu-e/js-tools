@@ -140,11 +140,9 @@ export function FinancePage({ iframeName }: FinancePageProps) {
   const sortedPayments = useMemo(
     () =>
       [...PAYMENT_OPTIONS].sort((a, b) => {
-        if (a.value === form.paymentMode) return -1;
-        if (b.value === form.paymentMode) return 1;
         return (paymentUsage[b.value] ?? 0) - (paymentUsage[a.value] ?? 0);
       }),
-    [paymentUsage, form.paymentMode]
+    [paymentUsage]
   );
 
   const primaryPayments = sortedPayments.slice(0, PRIMARY_PAYMENT_COUNT);

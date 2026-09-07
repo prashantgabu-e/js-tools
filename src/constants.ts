@@ -63,6 +63,30 @@ export const FINANCE_SHORTCUTS: FinanceShortcut[] = [
   }
 ];
 
+export const DESCRIPTION_SHORTCUTS_BY_CATEGORY: Record<string, string[]> = {
+  Food: ["Breakfast", "Lunch", "Dinner", "Snacks", "Tea/Coffee", "Groceries", "Restaurant"],
+  "Altroz CNG/Petrol": ["CNG", "Petrol", "Service", "Parking", "Fastag", "Wash"],
+  Altroz: ["Service", "Accessories", "Insurance", "Repair", "Parking"],
+  Activa: ["Petrol", "Service", "Repair", "Parking"],
+  Aviator: ["Petrol", "Service", "Repair", "Parking"],
+  "Flora Iris Household": ["Vegetables", "Milk", "Cleaning", "Kitchen", "Maintenance"],
+  "Surendranagar Household": ["Vegetables", "Milk", "Cleaning", "Kitchen", "Maintenance"],
+  "Flora Iris Bills": ["Electricity", "Internet", "Gas", "Maintenance", "Mobile recharge"],
+  EMIs: ["Loan EMI", "Card EMI", "Subscription EMI"],
+  "Guests/Friends": ["Tea/Snacks", "Dinner", "Gift", "Travel", "Split expense"],
+  Family: ["Medicine", "Groceries", "Gift", "Travel", "Support"],
+  Gift: ["Birthday", "Wedding", "Festival", "Return gift"],
+  Beauty: ["Haircut", "Salon", "Skincare", "Grooming"],
+  Health: ["Doctor", "Medicine", "Lab test", "Pharmacy", "Consultation"],
+  Transport: ["Auto", "Cab", "Bus", "Train", "Parking"],
+  Shopping: ["Clothes", "Electronics", "Home item", "Online order"],
+  "Entertainment Fun": ["Movie", "Cafe", "Game", "Outing"],
+  "Stationary Documents": ["Printout", "Courier", "Photocopy", "Office supplies"],
+  "Moira Nexus": ["Hosting", "Domain", "Tools", "Client expense"],
+  Career: ["Course", "Book", "Exam fee", "Certification"],
+  Losses: ["Late fee", "Fine", "Penalty", "Unexpected"]
+};
+
 export const CATEGORY_OPTIONS: SelectOption[] = [
   { value: "Food", label: "Food" },
   { value: "Altroz CNG/Petrol", label: "Altroz CNG/Petrol" },

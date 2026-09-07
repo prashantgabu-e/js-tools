@@ -1,6 +1,12 @@
 import type { FormEvent } from "react";
-import { useEffect, useRef, useState } from "react";
-import { CATEGORY_OPTIONS, FINANCE_SHORTCUTS, PAYMENT_OPTIONS, TRANSACTION_TYPE_OPTIONS } from "../constants";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import {
+  CATEGORY_OPTIONS,
+  DESCRIPTION_SHORTCUTS_BY_CATEGORY,
+  FINANCE_SHORTCUTS,
+  PAYMENT_OPTIONS,
+  TRANSACTION_TYPE_OPTIONS
+} from "../constants";
 import { formatLocalDateParts, formatLocalTimeParts } from "../utils/date";
 import { buildSingleFinancePayload, submitFinancePayload } from "../utils/finance";
 import type { FinancePayload } from "../types";
@@ -8,6 +14,10 @@ import type { FinancePayload } from "../types";
 interface FinancePageProps {
   iframeName: string;
 }
+
+const CATEGORY_USAGE_KEY = "moneyManage.categoryUsage";
+const PAYMENT_USAGE_KEY = "moneyManage.paymentUsage";
+const PRIMARY_PAYMENT_COUNT = 4;
 
 function createInitialState(): FinancePayload {
   return {
@@ -22,9 +32,42 @@ function createInitialState(): FinancePayload {
   };
 }
 
+function readUsage(key: string): Record<string, number> {
+  try {
+    const stored = window.localStorage.getItem(key);
+    return stored ? JSON.parse(stored) : {};
+  } catch {
+    return {};
+  }
+}
+
+function formatCompactDateTime(dateValue: string, timeValue: string): string {
+  const date = new Date(`${dateValue}T00:00:00`);
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+
+  let dateLabel = date.toLocaleDateString(undefined, { day: "numeric", month: "short" });
+  if (date.toDateString() === today.toDateString()) dateLabel = "Today";
+  if (date.toDateString() === tomorrow.toDateString()) dateLabel = "Tomorrow";
+  if (date.toDateString() === yesterday.toDateString()) dateLabel = "Yesterday";
+
+  const timeLabel = timeValue
+    ? new Date(`${dateValue}T${timeValue}`).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })
+    : "No time";
+
+  return `${dateLabel} · ${timeLabel}`;
+}
+
 export function FinancePage({ iframeName }: FinancePageProps) {
   const [form, setForm] = useState<FinancePayload>(createInitialState);
   const [amountInput, setAmountInput] = useState("");
+  const [categoryUsage, setCategoryUsage] = useState<Record<string, number>>({});
+  const [paymentUsage, setPaymentUsage] = useState<Record<string, number>>({});
+  const [isDateTimeOpen, setIsDateTimeOpen] = useState(false);
+  const [isMorePaymentsOpen, setIsMorePaymentsOpen] = useState(false);
   const [feedback, setFeedback] = useState<{ message: string; type: "" | "success" | "error" }>({
     message: "",
     type: ""
@@ -35,6 +78,8 @@ export function FinancePage({ iframeName }: FinancePageProps) {
   useEffect(() => {
     setForm(createInitialState());
     setAmountInput("");
+    setCategoryUsage(readUsage(CATEGORY_USAGE_KEY));
+    setPaymentUsage(readUsage(PAYMENT_USAGE_KEY));
     setFeedback({ message: "", type: "" });
   }, []);
 
@@ -66,6 +111,45 @@ export function FinancePage({ iframeName }: FinancePageProps) {
     amountInputRef.current?.focus();
   }
 
+  function applyDescriptionShortcut(description: string) {
+    updateField("description", description);
+  }
+
+  function recordUsage(category: string, paymentMode: string) {
+    setCategoryUsage((current) => {
+      const next = { ...current, [category]: (current[category] ?? 0) + 1 };
+      window.localStorage.setItem(CATEGORY_USAGE_KEY, JSON.stringify(next));
+      return next;
+    });
+    setPaymentUsage((current) => {
+      const next = { ...current, [paymentMode]: (current[paymentMode] ?? 0) + 1 };
+      window.localStorage.setItem(PAYMENT_USAGE_KEY, JSON.stringify(next));
+      return next;
+    });
+  }
+
+  const sortedCategories = useMemo(
+    () =>
+      [...CATEGORY_OPTIONS].sort((a, b) => {
+        return (categoryUsage[b.value] ?? 0) - (categoryUsage[a.value] ?? 0);
+      }),
+    [categoryUsage]
+  );
+
+  const sortedPayments = useMemo(
+    () =>
+      [...PAYMENT_OPTIONS].sort((a, b) => {
+        if (a.value === form.paymentMode) return -1;
+        if (b.value === form.paymentMode) return 1;
+        return (paymentUsage[b.value] ?? 0) - (paymentUsage[a.value] ?? 0);
+      }),
+    [paymentUsage, form.paymentMode]
+  );
+
+  const primaryPayments = sortedPayments.slice(0, PRIMARY_PAYMENT_COUNT);
+  const secondaryPayments = sortedPayments.slice(PRIMARY_PAYMENT_COUNT);
+  const descriptionShortcuts = form.category ? DESCRIPTION_SHORTCUTS_BY_CATEGORY[form.category] ?? [] : [];
+
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setFeedback({ message: "", type: "" });
@@ -82,6 +166,7 @@ export function FinancePage({ iframeName }: FinancePageProps) {
         throw new Error(response?.message || "Unable to add transaction. Please try again.");
       }
 
+      recordUsage(payload.category, payload.paymentMode);
       setFeedback({ message: "Transaction added successfully", type: "success" });
       setForm(createInitialState());
       setAmountInput("");
@@ -104,6 +189,26 @@ export function FinancePage({ iframeName }: FinancePageProps) {
         </div>
 
         <form className="finance-form" onSubmit={onSubmit} noValidate>
+          <label className="finance-field finance-field--amount">
+            <span>Amount</span>
+            <div className="finance-amount-wrap">
+              <span className="finance-currency" aria-hidden="true">
+                Rs
+              </span>
+              <input
+                ref={amountInputRef}
+                type="number"
+                inputMode="decimal"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+                required
+                value={amountInput}
+                onChange={(event) => setAmountInput(event.target.value)}
+              />
+            </div>
+          </label>
+
           <section className="finance-shortcuts" aria-labelledby="financeShortcutTitle">
             <div className="finance-shortcuts__header">
               <div>
@@ -131,53 +236,58 @@ export function FinancePage({ iframeName }: FinancePageProps) {
             </div>
           </section>
 
-          <div className="finance-row finance-row--two">
-            <label className="finance-field">
-              <span>Date</span>
-              <input type="date" required value={form.date} onChange={(event) => updateField("date", event.target.value)} />
-            </label>
+          <section className="finance-datetime">
+            <span>{formatCompactDateTime(form.date, form.time)}</span>
+            <button type="button" onClick={() => setIsDateTimeOpen((current) => !current)}>
+              Change
+            </button>
+          </section>
 
-            <label className="finance-field">
-              <span>Time</span>
-              <input type="time" value={form.time} onChange={(event) => updateField("time", event.target.value)} />
-            </label>
-          </div>
+          {isDateTimeOpen ? (
+            <div className="finance-row finance-row--two">
+              <label className="finance-field">
+                <span>Date</span>
+                <input type="date" required value={form.date} onChange={(event) => updateField("date", event.target.value)} />
+              </label>
 
-          <label className="finance-field finance-field--amount">
-            <span>Amount</span>
-            <div className="finance-amount-wrap">
-              <span className="finance-currency" aria-hidden="true">
-                Rs
-              </span>
-              <input
-                ref={amountInputRef}
-                type="number"
-                inputMode="decimal"
-                min="0"
-                step="0.01"
-                placeholder="0.00"
-                required
-                value={amountInput}
-                onChange={(event) => setAmountInput(event.target.value)}
-              />
+              <label className="finance-field">
+                <span>Time</span>
+                <input type="time" value={form.time} onChange={(event) => updateField("time", event.target.value)} />
+              </label>
             </div>
-          </label>
+          ) : null}
 
           <fieldset className="finance-group">
             <legend>Category</legend>
             <div className="finance-category-grid">
-              {CATEGORY_OPTIONS.map((option) => (
-                <label key={option.value}>
-                  <input
-                    className="finance-chip-input"
-                    type="radio"
-                    name="category"
-                    value={option.value}
-                    checked={form.category === option.value}
-                    onChange={(event) => updateField("category", event.target.value)}
-                  />
-                  <span className={`finance-chip finance-chip--category ${getFinanceCategoryClass(option.value)}`}>{option.label}</span>
-                </label>
+              {sortedCategories.map((option) => (
+                <Fragment key={option.value}>
+                  <label>
+                    <input
+                      className="finance-chip-input"
+                      type="radio"
+                      name="category"
+                      value={option.value}
+                      checked={form.category === option.value}
+                      onChange={(event) => updateField("category", event.target.value)}
+                    />
+                    <span className={`finance-chip finance-chip--category ${getFinanceCategoryClass(option.value)}`}>{option.label}</span>
+                  </label>
+                  {form.category === option.value && descriptionShortcuts.length > 0 ? (
+                    <div className="finance-description-shortcuts" aria-label={`${form.category} description shortcuts`}>
+                      {descriptionShortcuts.map((description) => (
+                        <button
+                          key={description}
+                          type="button"
+                          className={`finance-description-pill${form.description === description ? " is-active" : ""}`}
+                          onClick={() => applyDescriptionShortcut(description)}
+                        >
+                          {description}
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
+                </Fragment>
               ))}
             </div>
           </fieldset>
@@ -196,7 +306,7 @@ export function FinancePage({ iframeName }: FinancePageProps) {
           <fieldset className="finance-group">
             <legend>Payment</legend>
             <div className="finance-chip-row finance-chip-row--payment">
-              {PAYMENT_OPTIONS.map((option) => (
+              {primaryPayments.map((option) => (
                 <label key={option.value}>
                   <input
                     className="finance-chip-input"
@@ -210,6 +320,30 @@ export function FinancePage({ iframeName }: FinancePageProps) {
                 </label>
               ))}
             </div>
+            {secondaryPayments.length > 0 ? (
+              <div className="finance-payment-more">
+                <button type="button" onClick={() => setIsMorePaymentsOpen((current) => !current)}>
+                  {isMorePaymentsOpen ? "Hide" : "More"} payment methods
+                </button>
+                {isMorePaymentsOpen ? (
+                  <div className="finance-chip-row finance-chip-row--payment">
+                    {secondaryPayments.map((option) => (
+                      <label key={option.value}>
+                        <input
+                          className="finance-chip-input"
+                          type="radio"
+                          name="paymentMode"
+                          value={option.value}
+                          checked={form.paymentMode === option.value}
+                          onChange={(event) => updateField("paymentMode", event.target.value)}
+                        />
+                        <span className="finance-chip">{option.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
           </fieldset>
 
           <fieldset className="finance-group">

@@ -9,9 +9,9 @@ interface SidebarProps {
 }
 
 const navItems: Array<{ view: AppView; icon: typeof MessageSquareMore }> = [
-  { view: "sms-analyzer", icon: MessageSquareMore },
   { view: "finance", icon: WalletCards },
-  { view: "bulk-finance", icon: Rows3 }
+  { view: "bulk-finance", icon: Rows3 },
+  { view: "sms-analyzer", icon: MessageSquareMore }
 ];
 
 export function Sidebar({ activeView, isOpen, onNavigate }: SidebarProps) {

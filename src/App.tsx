@@ -19,19 +19,23 @@ function getViewFromHash(hash: string): AppView {
     return "finance";
   }
 
-  return "sms-analyzer";
+  if (normalizedHash.startsWith("sms-analyzer")) {
+    return "sms-analyzer";
+  }
+
+  return "finance";
 }
 
 function ensureDefaultHash() {
   if (!window.location.hash || window.location.hash === "#") {
-    window.location.hash = ROUTE_HASHES["sms-analyzer"];
+    window.location.hash = ROUTE_HASHES.finance;
   }
 }
 
 export function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [currentView, setCurrentView] = useState<AppView>(() =>
-    typeof window === "undefined" ? "sms-analyzer" : getViewFromHash(window.location.hash)
+    typeof window === "undefined" ? "finance" : getViewFromHash(window.location.hash)
   );
 
   useEffect(() => {

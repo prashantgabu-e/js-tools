@@ -868,7 +868,7 @@ button {
 .finance-form {
   display: grid;
   gap: 0.7rem;
-  padding-bottom: 5.75rem;
+  padding-bottom: 0.5rem;
 }
 
 .finance-shortcuts {
@@ -1311,6 +1311,15 @@ button {
   backdrop-filter: blur(8px);
 }
 
+.finance-submit-bar--single {
+  position: fixed;
+  right: clamp(1.25rem, 3vw, 3rem);
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  left: calc(260px + clamp(1.25rem, 3vw, 3rem));
+  z-index: 39;
+  width: min(560px, calc(100vw - 260px - clamp(1.25rem, 3vw, 3rem) * 2));
+}
+
 .amount-calculator-overlay {
   position: fixed;
   inset: 0;
@@ -1472,7 +1481,7 @@ button {
   }
 
   .main {
-    padding: 0.85rem 0.85rem 6.5rem;
+    padding: 0.85rem 0.85rem 13rem;
   }
 
   .topbar__title {
@@ -1515,21 +1524,32 @@ button {
   }
 
   .finance-form {
-    padding-bottom: 11.5rem;
+    padding-bottom: 0.5rem;
   }
 
-  .finance-panel .finance-submit-bar {
-    position: fixed;
-    right: 0.85rem;
-    bottom: calc(max(0.75rem, env(safe-area-inset-bottom)) + 76px);
-    left: 0.85rem;
-    z-index: 39;
+  .finance-submit-bar--single {
+    position: fixed !important;
+    right: 0.85rem !important;
+    bottom: calc(78px + max(0.75rem, env(safe-area-inset-bottom))) !important;
+    left: 0.85rem !important;
+    z-index: 999 !important;
+    display: grid !important;
+    width: auto !important;
+    max-width: none !important;
+    min-height: 58px;
     gap: 0.45rem;
     padding: 0.65rem;
     border-radius: 22px;
+    opacity: 1 !important;
+    transform: translateZ(0);
+    visibility: visible !important;
   }
 
-  .finance-panel .finance-submit {
+  .finance-submit-bar--single .finance-feedback:empty {
+    display: none;
+  }
+
+  .finance-submit-bar--single .finance-submit {
     min-height: 42px;
   }
 
@@ -1553,7 +1573,7 @@ button {
     right: 0.85rem;
     bottom: max(0.75rem, env(safe-area-inset-bottom));
     left: 0.85rem;
-    z-index: 40;
+    z-index: 50;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     min-height: 64px;
@@ -1591,7 +1611,7 @@ button {
 
 @media (max-width: 640px) {
   .main {
-    padding: 0.75rem;
+    padding: 0.75rem 0.75rem 13rem;
   }
 
   .panel {
@@ -1662,7 +1682,7 @@ button {
     padding: 0.8rem;
   }
 
-  .finance-panel .finance-submit-bar {
+  .finance-submit-bar--single {
     padding: 0.62rem;
   }
 

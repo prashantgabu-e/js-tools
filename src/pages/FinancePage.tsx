@@ -20,6 +20,7 @@ interface FinancePageProps {
 const CATEGORY_USAGE_KEY = "moneyManage.categoryUsage";
 const PAYMENT_USAGE_KEY = "moneyManage.paymentUsage";
 const PRIMARY_PAYMENT_COUNT = 4;
+const FINANCE_FORM_ID = "financeTransactionForm";
 
 function createInitialState(): FinancePayload {
   return {
@@ -183,7 +184,7 @@ export function FinancePage({ iframeName }: FinancePageProps) {
   return (
     <section className="page-view finance-page page-view--active">
       <section className="panel finance-panel">
-        <form className="finance-form" onSubmit={onSubmit} noValidate>
+        <form id={FINANCE_FORM_ID} className="finance-form" onSubmit={onSubmit} noValidate>
           <label className="finance-field finance-field--amount">
             <span>Amount</span>
             <div className="finance-amount-wrap">
@@ -357,21 +358,22 @@ export function FinancePage({ iframeName }: FinancePageProps) {
             </div>
           </fieldset>
 
-          <div className="finance-submit-bar">
-            {feedback.message ? (
-              <div className={`finance-feedback${feedback.type ? ` is-${feedback.type}` : ""}`} role="status" aria-live="polite">
-                <p>{feedback.message}</p>
-                <button type="button" className="finance-feedback__clear" onClick={() => setFeedback({ message: "", type: "" })} aria-label="Clear message">
-                  <X className="icon" aria-hidden="true" />
-                </button>
-              </div>
-            ) : null}
-            <button className="finance-submit" type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : "Save Transaction"}
-            </button>
-          </div>
         </form>
       </section>
+
+      <div className="finance-submit-bar finance-submit-bar--single">
+        {feedback.message ? (
+          <div className={`finance-feedback${feedback.type ? ` is-${feedback.type}` : ""}`} role="status" aria-live="polite">
+            <p>{feedback.message}</p>
+            <button type="button" className="finance-feedback__clear" onClick={() => setFeedback({ message: "", type: "" })} aria-label="Clear message">
+              <X className="icon" aria-hidden="true" />
+            </button>
+          </div>
+        ) : null}
+        <button className="finance-submit" type="submit" form={FINANCE_FORM_ID} disabled={isSubmitting}>
+          {isSubmitting ? "Saving..." : "Save Transaction"}
+        </button>
+      </div>
     </section>
   );
 }

@@ -81,6 +81,38 @@ export const FINANCE_SHORTCUTS: FinanceShortcut[] = [
     paymentMode: "Credit Card",
     description: "Shopify",
     amount: 1994
+  },
+  {
+    label: "Maid",
+    transactionType: "Expense",
+    category: "Flora Iris Bills",
+    paymentMode: "Cash",
+    description: "Maid",
+    amount: 600
+  },
+  {
+    label: "Car cleaning",
+    transactionType: "Expense",
+    category: "Flora Iris Bills",
+    paymentMode: "Cash",
+    description: "Car cleaning",
+    amount: 600
+  },
+  {
+    label: "Home Loan",
+    transactionType: "Expense",
+    category: "EMIs",
+    paymentMode: "Auto Debit",
+    description: "Home Loan",
+    amount: 19653
+  },
+  {
+    label: "Car Loan Altroz",
+    transactionType: "Expense",
+    category: "EMIs",
+    paymentMode: "Auto Debit",
+    description: "Car Loan Altroz",
+    amount: 14413
   }
 ];
 

@@ -1,6 +1,7 @@
 import type { FormEvent } from "react";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { X } from "lucide-react";
+import { AmountCalculator } from "../components/AmountCalculator";
 import {
   CATEGORY_OPTIONS,
   DESCRIPTION_SHORTCUTS_BY_CATEGORY,
@@ -96,16 +97,16 @@ export function FinancePage({ iframeName }: FinancePageProps) {
 
     setForm((current) => ({
       ...createInitialState(),
-      amount: 0,
+      amount: preset.amount ?? 0,
       transactionType: preset.transactionType,
       category: preset.category,
       paymentMode: preset.paymentMode,
       description: preset.description,
       entrySource: current.entrySource
     }));
-    setAmountInput("");
+    setAmountInput(preset.amount ? String(preset.amount) : "");
     setFeedback({
-      message: `Shortcut applied: ${preset.label}. Enter the amount to save.`,
+      message: preset.amount ? `Shortcut applied: ${preset.label}.` : `Shortcut applied: ${preset.label}. Enter the amount to save.`,
       type: "success"
     });
     // Keep focus inside the tap/click event so mobile browsers can open the numeric keyboard.
@@ -200,6 +201,7 @@ export function FinancePage({ iframeName }: FinancePageProps) {
                 value={amountInput}
                 onChange={(event) => setAmountInput(event.target.value)}
               />
+              <AmountCalculator value={amountInput} onApply={setAmountInput} />
             </div>
           </label>
 

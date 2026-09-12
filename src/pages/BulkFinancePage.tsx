@@ -1,5 +1,6 @@
 import type { FormEvent } from "react";
 import { useState } from "react";
+import { AmountCalculator } from "../components/AmountCalculator";
 import { CATEGORY_OPTIONS, PAYMENT_OPTIONS, TRANSACTION_TYPE_OPTIONS } from "../constants";
 import { formatLocalDateParts, formatLocalTimeParts } from "../utils/date";
 import { submitFinancePayload } from "../utils/finance";
@@ -174,16 +175,23 @@ export function BulkFinancePage({ iframeName }: BulkFinancePageProps) {
                       </select>
                     </td>
                     <td data-label="Amount">
-                      <input
-                        className="bulk-field bulk-field--amount"
-                        type="number"
-                        inputMode="decimal"
-                        min="0"
-                        step="0.01"
-                        value={row.amount}
-                        placeholder="0.00"
-                        onChange={(event) => updateRow(row.id, "amount", event.target.value)}
-                      />
+                      <div className="bulk-amount-wrap">
+                        <input
+                          className="bulk-field bulk-field--amount"
+                          type="number"
+                          inputMode="decimal"
+                          min="0"
+                          step="0.01"
+                          value={row.amount}
+                          placeholder="0.00"
+                          onChange={(event) => updateRow(row.id, "amount", event.target.value)}
+                        />
+                        <AmountCalculator
+                          value={row.amount}
+                          onApply={(amount) => updateRow(row.id, "amount", amount)}
+                          buttonClassName="amount-calculator-trigger amount-calculator-trigger--bulk"
+                        />
+                      </div>
                     </td>
                     <td data-label="Description">
                       <input

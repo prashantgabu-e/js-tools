@@ -1,5 +1,8 @@
 *.xml
 *.gs
+.env
+.env.local
+.env.*.local
 .vscode/settings.json
 node_modules
 *.tsbuildinfo

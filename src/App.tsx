@@ -1,5 +1,6 @@
 import { Menu } from "lucide-react";
 import { useEffect, useState } from "react";
+import { AuthGate } from "./components/AuthGate";
 import { Topbar } from "./components/Topbar";
 import { BottomNavigation, Sidebar } from "./components/Sidebar";
 import { PAGE_COPY, ROUTE_HASHES } from "./constants";
@@ -61,19 +62,23 @@ export function App() {
   );
 
   return (
-    <div className="app-shell">
-      <Sidebar activeView={currentView} isOpen={isSidebarOpen} onNavigate={() => setIsSidebarOpen(false)} />
+    <AuthGate>
+      {({ logoutButton }) => (
+        <div className="app-shell">
+          <Sidebar activeView={currentView} isOpen={isSidebarOpen} onNavigate={() => setIsSidebarOpen(false)} />
 
-      <main className="main">
-        <Topbar eyebrow={copy.eyebrow} title={copy.title} mobileMenuButton={mobileMenuButton} />
-        <div key={currentView}>
-          {currentView === "sms-analyzer" ? <SmsAnalyzerPage /> : null}
-          {currentView === "finance" ? <FinancePage iframeName="financeSubmitFrame" /> : null}
-          {currentView === "bulk-finance" ? <BulkFinancePage iframeName="financeSubmitFrame" /> : null}
+          <main className="main">
+            <Topbar eyebrow={copy.eyebrow} title={copy.title} mobileMenuButton={mobileMenuButton} actions={logoutButton} />
+            <div key={currentView}>
+              {currentView === "sms-analyzer" ? <SmsAnalyzerPage /> : null}
+              {currentView === "finance" ? <FinancePage iframeName="financeSubmitFrame" /> : null}
+              {currentView === "bulk-finance" ? <BulkFinancePage iframeName="financeSubmitFrame" /> : null}
+            </div>
+            <iframe id="financeSubmitFrame" name="financeSubmitFrame" title="Finance submission handler" hidden />
+          </main>
+          <BottomNavigation activeView={currentView} onNavigate={() => setIsSidebarOpen(false)} />
         </div>
-        <iframe id="financeSubmitFrame" name="financeSubmitFrame" title="Finance submission handler" hidden />
-      </main>
-      <BottomNavigation activeView={currentView} onNavigate={() => setIsSidebarOpen(false)} />
-    </div>
+      )}
+    </AuthGate>
   );
 }

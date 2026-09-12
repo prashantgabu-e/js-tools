@@ -41,9 +41,17 @@ export interface FinanceShortcut {
   category: string;
   paymentMode: string;
   description: string;
+  amount?: number;
 }
 
 export interface SelectOption {
   value: string;
   label: string;
+}
+
+export interface AuthUser {
+  email: string;
+  name: string;
+  picture: string;
+  exp: number;
 }

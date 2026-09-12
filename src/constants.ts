@@ -5,6 +5,11 @@ export const FINANCE_API_URL =
 
 export const FINANCE_SUBMISSION_TIMEOUT_MS = 45_000;
 export const USD_TO_INR_RATE = 95.2282;
+export const GOOGLE_CLIENT_ID =
+  import.meta.env.VITE_GOOGLE_CLIENT_ID ??
+  (typeof document === "undefined" ? "" : document.querySelector<HTMLMetaElement>('meta[name="google-client-id"]')?.content ?? "");
+export const AUTH_SESSION_KEY = "moneyManage.googleAuth";
+export const ALLOWED_GOOGLE_EMAILS = ["prikstheprashant@gmail.com", "prashantg5399@gmail.com"];
 
 export const PAGE_COPY: Record<
   AppView,
@@ -60,6 +65,22 @@ export const FINANCE_SHORTCUTS: FinanceShortcut[] = [
     category: "Guests/Friends",
     paymentMode: "UPI",
     description: ""
+  },
+  {
+    label: "Open AI",
+    transactionType: "Expense",
+    category: "Moira Nexus",
+    paymentMode: "Credit Card",
+    description: "Open AI",
+    amount: 2000
+  },
+  {
+    label: "Shopify",
+    transactionType: "Expense",
+    category: "Moira Nexus",
+    paymentMode: "Credit Card",
+    description: "Shopify",
+    amount: 1994
   }
 ];
 

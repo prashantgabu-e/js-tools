@@ -177,10 +177,18 @@ button {
   box-shadow: none;
 }
 
+.topbar__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
 .topbar__title {
   display: flex;
   align-items: center;
   gap: 1rem;
+  min-width: 0;
 }
 
 .eyebrow {
@@ -369,7 +377,10 @@ button {
 .finance-datetime button,
 .finance-description-pill,
 .finance-payment-more button,
-.bulk-remove-row-btn {
+.bulk-remove-row-btn,
+.amount-calculator-trigger,
+.amount-calculator__close,
+.amount-calculator__key {
   cursor: pointer;
 }
 
@@ -586,6 +597,125 @@ button {
   color: var(--text);
 }
 
+.auth-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: var(--bg);
+}
+
+.auth-card {
+  width: min(100%, 420px);
+  display: grid;
+  justify-items: center;
+  gap: 0.85rem;
+  padding: clamp(1.15rem, 5vw, 1.7rem);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.auth-card__icon {
+  display: grid;
+  width: 54px;
+  height: 54px;
+  place-items: center;
+  border-radius: 16px;
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.auth-card__icon .icon {
+  width: 26px;
+  height: 26px;
+}
+
+.auth-card h1 {
+  margin: 0;
+  font-size: clamp(1.6rem, 7vw, 2.15rem);
+}
+
+.auth-card p {
+  margin: 0;
+}
+
+.auth-card > p:not(.eyebrow):not(.auth-message) {
+  color: var(--muted);
+}
+
+.auth-google-button {
+  min-height: 44px;
+  display: grid;
+  place-items: center;
+}
+
+.auth-message {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-soft);
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.auth-message.is-error {
+  border-color: rgba(185, 28, 28, 0.18);
+  background: #fff5f5;
+  color: #b91c1c;
+}
+
+.auth-user {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.auth-user img {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+}
+
+.auth-user > span {
+  max-width: 220px;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.auth-user button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 36px;
+  padding: 0 0.75rem;
+  border: 1px solid rgba(61, 133, 96, 0.18);
+  border-radius: 12px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 0.78rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.auth-user button .icon {
+  width: 16px;
+  height: 16px;
+}
+
 .finance-page {
   margin-top: 1.1rem;
 }
@@ -659,6 +789,16 @@ button {
 
 .bulk-field--amount {
   min-width: 88px;
+}
+
+.bulk-amount-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.bulk-amount-wrap .bulk-field--amount {
+  padding-right: 2.35rem;
 }
 
 .bulk-finance-table td:nth-child(4) .bulk-field,
@@ -797,12 +937,51 @@ button {
 .finance-field--amount input {
   min-height: 56px;
   padding-left: 2.4rem;
+  padding-right: 3.1rem;
   font-size: 1.35rem;
   font-weight: 800;
 }
 
 .finance-amount-wrap {
   position: relative;
+}
+
+.amount-calculator-trigger {
+  position: absolute;
+  top: 50%;
+  right: 0.55rem;
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid rgba(61, 133, 96, 0.18);
+  border-radius: 12px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  transform: translateY(-50%);
+  transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+}
+
+.amount-calculator-trigger:hover {
+  border-color: rgba(61, 133, 96, 0.34);
+  transform: translateY(-50%) translateY(-1px);
+}
+
+.amount-calculator-trigger .icon {
+  width: 18px;
+  height: 18px;
+}
+
+.amount-calculator-trigger--bulk {
+  right: 0.3rem;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+}
+
+.amount-calculator-trigger--bulk .icon {
+  width: 15px;
+  height: 15px;
 }
 
 .finance-currency {
@@ -1106,6 +1285,141 @@ button {
   backdrop-filter: blur(8px);
 }
 
+.amount-calculator-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(37, 49, 43, 0.34);
+}
+
+.amount-calculator {
+  width: min(100%, 390px);
+  max-height: min(720px, calc(100vh - 2rem));
+  display: grid;
+  gap: 0.8rem;
+  padding: 1rem;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: 0 24px 58px rgba(37, 49, 43, 0.22);
+}
+
+.amount-calculator__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.amount-calculator__header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.amount-calculator__close {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-soft);
+  color: var(--muted);
+}
+
+.amount-calculator__close .icon {
+  width: 17px;
+  height: 17px;
+}
+
+.amount-calculator__display {
+  display: grid;
+  gap: 0.35rem;
+  min-height: 104px;
+  padding: 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface-soft);
+}
+
+.amount-calculator__formula {
+  min-height: 32px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 800;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.amount-calculator__result {
+  align-self: end;
+  min-height: 34px;
+  color: var(--primary);
+  font-size: 1.65rem;
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.amount-calculator__result.is-error {
+  color: #b54708;
+  font-size: 1rem;
+  text-align: left;
+}
+
+.amount-calculator__keys {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.amount-calculator__key {
+  display: grid;
+  min-width: 0;
+  min-height: 54px;
+  place-items: center;
+  border: 1px solid rgba(22, 33, 51, 0.1);
+  border-radius: 14px;
+  background: var(--surface-soft);
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1;
+  transition: border-color 0.18s ease, background 0.18s ease, color 0.18s ease, transform 0.18s ease, opacity 0.18s ease;
+}
+
+.amount-calculator__key:hover {
+  border-color: rgba(61, 133, 96, 0.34);
+  transform: translateY(-1px);
+}
+
+.amount-calculator__key:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.amount-calculator__key--operator {
+  background: #fff;
+  color: var(--primary);
+}
+
+.amount-calculator__key--equals {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.amount-calculator__key--ok {
+  background: var(--primary);
+  color: #fff;
+}
+
 .bottom-nav {
   display: none;
 }
@@ -1138,6 +1452,14 @@ button {
   .topbar__title {
     width: 100%;
     align-items: flex-start;
+  }
+
+  .topbar {
+    align-items: flex-start;
+  }
+
+  .auth-user > span {
+    display: none;
   }
 
   .stats-grid {
@@ -1180,6 +1502,17 @@ button {
 
   .finance-panel .finance-submit {
     min-height: 42px;
+  }
+
+  .amount-calculator-overlay {
+    align-items: end;
+    padding: 0.8rem 0.8rem calc(max(0.8rem, env(safe-area-inset-bottom)) + 72px);
+  }
+
+  .amount-calculator {
+    width: 100%;
+    max-height: min(640px, calc(100vh - 7.5rem));
+    border-radius: 20px;
   }
 
   .toolbar > * {
@@ -1244,6 +1577,15 @@ button {
     min-width: 100%;
   }
 
+  .topbar {
+    flex-wrap: wrap;
+  }
+
+  .topbar__actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
   .toolbar {
     display: grid;
     grid-template-columns: 1fr;
@@ -1269,6 +1611,10 @@ button {
   .finance-field input {
     min-height: 46px;
   }
+
+  .amount-calculator__key {
+    min-height: 50px;
+  }
 }
 
 @media (max-width: 420px) {
@@ -1292,5 +1638,18 @@ button {
   .finance-chip {
     min-height: 40px;
     font-size: 0.76rem;
+  }
+
+  .amount-calculator {
+    padding: 0.85rem;
+  }
+
+  .amount-calculator__result {
+    font-size: 1.42rem;
+  }
+
+  .amount-calculator__key {
+    min-height: 48px;
+    border-radius: 12px;
   }
 }

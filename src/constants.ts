@@ -46,11 +46,25 @@ export const ROUTE_HASHES: Record<AppView, string> = {
 
 export const FINANCE_SHORTCUTS: FinanceShortcut[] = [
   {
-    label: "Food",
+    label: "Offline Food",
     transactionType: "Expense",
     category: "Food",
-    paymentMode: "UPI",
-    description: ""
+    paymentMode: "Credit Card",
+    description: "Offline Food"
+  },
+  {
+    label: "Online Food",
+    transactionType: "Expense",
+    category: "Food",
+    paymentMode: "Credit Card",
+    description: "Online Food"
+  },
+  {
+    label: "Aviator Petrol",
+    transactionType: "Expense",
+    category: "Aviator",
+    paymentMode: "Credit Card",
+    description: "Petrol"
   },
   {
     label: "Altroz CNG/Petrol",
@@ -117,7 +131,7 @@ export const FINANCE_SHORTCUTS: FinanceShortcut[] = [
 ];
 
 export const DESCRIPTION_SHORTCUTS_BY_CATEGORY: Record<string, string[]> = {
-  Food: ["Breakfast", "Lunch", "Dinner", "Snacks", "Tea/Coffee", "Groceries", "Restaurant"],
+  Food: ["Online Food", "Offline Food", "Breakfast", "Lunch", "Dinner", "Snacks", "Tea/Coffee", "Groceries", "Restaurant"],
   "Altroz CNG/Petrol": ["CNG", "Petrol", "Service", "Parking", "Fastag", "Wash"],
   Altroz: ["Service", "Accessories", "Insurance", "Repair", "Parking"],
   Activa: ["Petrol", "Service", "Repair", "Parking"],

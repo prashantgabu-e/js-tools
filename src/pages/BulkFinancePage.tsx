@@ -1,13 +1,11 @@
 import type { FormEvent } from "react";
 import { useState } from "react";
 import { AmountCalculator } from "../components/AmountCalculator";
-import { CATEGORY_OPTIONS, PAYMENT_OPTIONS, TRANSACTION_TYPE_OPTIONS } from "../constants";
+import { JobQueue } from "../components/JobQueue";
+import { CATEGORY_OPTIONS, FINANCE_SHORTCUTS, PAYMENT_OPTIONS, TRANSACTION_TYPE_OPTIONS } from "../constants";
+import { useJobQueue } from "../contexts/JobQueueContext";
 import { formatLocalDateParts, formatLocalTimeParts } from "../utils/date";
-import { submitFinancePayload } from "../utils/finance";
-
-interface BulkFinancePageProps {
-  iframeName: string;
-}
+import type { FinanceJob, FinancePayload } from "../types";
 
 interface BulkRow {
   id: string;
@@ -19,6 +17,8 @@ interface BulkRow {
   description: string;
   paymentMode: string;
 }
+
+const BULK_RUNNABLE_SHORTCUTS = FINANCE_SHORTCUTS.filter((shortcut) => typeof shortcut.amount === "number" && shortcut.amount > 0);
 
 function createRow(): BulkRow {
   return {
@@ -33,13 +33,14 @@ function createRow(): BulkRow {
   };
 }
 
-export function BulkFinancePage({ iframeName }: BulkFinancePageProps) {
+export function BulkFinancePage() {
+  const { jobs, queueBulk } = useJobQueue();
   const [rows, setRows] = useState<BulkRow[]>([createRow()]);
+  const [selectedShortcuts, setSelectedShortcuts] = useState<string[]>([]);
   const [feedback, setFeedback] = useState<{ message: string; type: "" | "success" | "error" }>({
     message: "",
     type: ""
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   function updateRow(id: string, key: keyof BulkRow, value: string) {
     setRows((current) => current.map((row) => (row.id === id ? { ...row, [key]: value } : row)));
@@ -54,7 +55,32 @@ export function BulkFinancePage({ iframeName }: BulkFinancePageProps) {
     setFeedback({ message: "", type: "" });
   }
 
-  function getTransactions() {
+  function toggleShortcut(label: string) {
+    setSelectedShortcuts((current) => (current.includes(label) ? current.filter((selected) => selected !== label) : [...current, label]));
+  }
+
+  function runSelectedShortcuts() {
+    const shortcuts = BULK_RUNNABLE_SHORTCUTS.filter((shortcut) => selectedShortcuts.includes(shortcut.label));
+    if (!shortcuts.length) return;
+
+    const shortcutRows = shortcuts.map((shortcut) => ({
+      ...createRow(),
+      transactionType: shortcut.transactionType,
+      category: shortcut.category,
+      amount: shortcut.amount ? String(shortcut.amount) : "",
+      description: shortcut.description,
+      paymentMode: shortcut.paymentMode
+    }));
+
+    setRows((current) => {
+      const hasOnlyBlankRow = current.length === 1 && !current[0].category && !current[0].amount && !current[0].description;
+      return hasOnlyBlankRow ? shortcutRows : [...current, ...shortcutRows];
+    });
+    setSelectedShortcuts([]);
+    setFeedback({ message: `${shortcutRows.length} quick fill${shortcutRows.length === 1 ? "" : "s"} added to the table.`, type: "success" });
+  }
+
+  function getTransactions(): FinancePayload[] {
     if (!rows.length) {
       throw new Error("Add at least one transaction.");
     }
@@ -69,7 +95,7 @@ export function BulkFinancePage({ iframeName }: BulkFinancePageProps) {
         amount,
         description: row.description.trim(),
         paymentMode: row.paymentMode.trim(),
-        entrySource: "Website"
+        entrySource: "Website" as const
       };
 
       if (!transaction.date || !transaction.transactionType || !transaction.category || !row.amount.trim() || !Number.isFinite(amount) || amount <= 0) {
@@ -80,29 +106,16 @@ export function BulkFinancePage({ iframeName }: BulkFinancePageProps) {
     });
   }
 
-  async function onSubmit(event: FormEvent<HTMLFormElement>) {
+  function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setFeedback({ message: "", type: "" });
 
     try {
       const transactions = getTransactions();
-      setIsSubmitting(true);
-
-      const response = await submitFinancePayload(
-        {
-          operation: "bulk-add",
-          transactions: JSON.stringify(transactions)
-        },
-        iframeName
-      );
-
-      if (!response?.success) {
-        throw new Error(response?.message || "Unable to add transactions. Please try again.");
-      }
-
+      queueBulk(transactions);
       setRows([createRow()]);
       setFeedback({
-        message: `${transactions.length} transaction${transactions.length === 1 ? "" : "s"} added successfully.`,
+        message: `${transactions.length} transaction${transactions.length === 1 ? "" : "s"} queued for saving.`,
         type: "success"
       });
     } catch (error) {
@@ -110,20 +123,51 @@ export function BulkFinancePage({ iframeName }: BulkFinancePageProps) {
         message: error instanceof Error ? error.message : "Unable to add transactions. Please try again.",
         type: "error"
       });
-    } finally {
-      setIsSubmitting(false);
     }
+  }
+
+  function applyJob(job: FinanceJob) {
+    if (!Array.isArray(job.data)) return;
+    setRows(
+      job.data.map(({ amount, entrySource: _entrySource, ...transaction }) => ({
+        ...transaction,
+        id: crypto.randomUUID(),
+        amount: String(amount)
+      }))
+    );
+    setFeedback({ message: "Job data applied to the table.", type: "success" });
   }
 
   return (
     <section className="page-view finance-page page-view--active">
       <section className="panel bulk-finance-panel">
+        <JobQueue jobs={jobs} kind="bulk" onApply={applyJob} />
+        <section className="bulk-quick-fills" aria-labelledby="bulkQuickFillTitle">
+          <div className="bulk-quick-fills__header">
+            <div>
+              <p className="eyebrow" id="bulkQuickFillTitle">Quick fill runner</p>
+              <p>Select one or more shortcuts, then add them to the table.</p>
+            </div>
+            <button className="bulk-run-shortcuts-btn" type="button" onClick={runSelectedShortcuts} disabled={!selectedShortcuts.length}>
+              Run selected{selectedShortcuts.length ? ` (${selectedShortcuts.length})` : ""}
+            </button>
+          </div>
+          <div className="bulk-quick-fills__options">
+            {BULK_RUNNABLE_SHORTCUTS.map((shortcut) => (
+              <label key={shortcut.label} className="bulk-quick-fills__option">
+                <input type="checkbox" checked={selectedShortcuts.includes(shortcut.label)} onChange={() => toggleShortcut(shortcut.label)} />
+                <span>{shortcut.label}</span>
+              </label>
+            ))}
+          </div>
+        </section>
+
         <div className="finance-heading bulk-finance-heading">
           <div>
             <h3>Bulk Add Transactions</h3>
             <p>Add several transactions, then save them together.</p>
           </div>
-          <button className="bulk-add-row-btn" type="button" onClick={addRow} disabled={isSubmitting}>
+          <button className="bulk-add-row-btn" type="button" onClick={addRow}>
             Add row
           </button>
         </div>
@@ -228,9 +272,7 @@ export function BulkFinancePage({ iframeName }: BulkFinancePageProps) {
             <p className={`finance-feedback${feedback.type ? ` is-${feedback.type}` : ""}`} role="status" aria-live="polite">
               {feedback.message}
             </p>
-            <button className="finance-submit" type="submit" disabled={isSubmitting}>
-              {isSubmitting ? `Saving ${rows.length} transactions...` : "Save all transactions"}
-            </button>
+            <button className="finance-submit" type="submit">Save all transactions</button>
           </div>
         </form>
       </section>

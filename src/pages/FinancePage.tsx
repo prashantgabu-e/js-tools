@@ -2,6 +2,8 @@ import type { FormEvent } from "react";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { AmountCalculator } from "../components/AmountCalculator";
+import { JobQueue } from "../components/JobQueue";
+import { useJobQueue } from "../contexts/JobQueueContext";
 import {
   CATEGORY_OPTIONS,
   DESCRIPTION_SHORTCUTS_BY_CATEGORY,
@@ -10,12 +12,8 @@ import {
   TRANSACTION_TYPE_OPTIONS
 } from "../constants";
 import { formatLocalDateParts, formatLocalTimeParts } from "../utils/date";
-import { buildSingleFinancePayload, submitFinancePayload } from "../utils/finance";
-import type { FinancePayload } from "../types";
-
-interface FinancePageProps {
-  iframeName: string;
-}
+import { buildSingleFinancePayload } from "../utils/finance";
+import type { FinanceJob, FinancePayload } from "../types";
 
 const CATEGORY_USAGE_KEY = "moneyManage.categoryUsage";
 const PAYMENT_USAGE_KEY = "moneyManage.paymentUsage";
@@ -64,7 +62,8 @@ function formatCompactDateTime(dateValue: string, timeValue: string): string {
   return `${dateLabel} · ${timeLabel}`;
 }
 
-export function FinancePage({ iframeName }: FinancePageProps) {
+export function FinancePage() {
+  const { jobs, queueSingle } = useJobQueue();
   const [form, setForm] = useState<FinancePayload>(createInitialState);
   const [amountInput, setAmountInput] = useState("");
   const [categoryUsage, setCategoryUsage] = useState<Record<string, number>>({});
@@ -75,7 +74,6 @@ export function FinancePage({ iframeName }: FinancePageProps) {
     message: "",
     type: ""
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const amountInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -151,7 +149,7 @@ export function FinancePage({ iframeName }: FinancePageProps) {
   const secondaryPayments = sortedPayments.slice(PRIMARY_PAYMENT_COUNT);
   const descriptionShortcuts = form.category ? DESCRIPTION_SHORTCUTS_BY_CATEGORY[form.category] ?? [] : [];
 
-  async function onSubmit(event: FormEvent<HTMLFormElement>) {
+  function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setFeedback({ message: "", type: "" });
 
@@ -161,14 +159,9 @@ export function FinancePage({ iframeName }: FinancePageProps) {
         amount: Number(amountInput)
       });
 
-      setIsSubmitting(true);
-      const response = await submitFinancePayload(payload, iframeName);
-      if (!response?.success) {
-        throw new Error(response?.message || "Unable to add transaction. Please try again.");
-      }
-
+      queueSingle(payload);
       recordUsage(payload.category, payload.paymentMode);
-      setFeedback({ message: "Transaction added successfully", type: "success" });
+      setFeedback({ message: "Transaction save job queued.", type: "success" });
       setForm(createInitialState());
       setAmountInput("");
     } catch (error) {
@@ -176,14 +169,22 @@ export function FinancePage({ iframeName }: FinancePageProps) {
         message: error instanceof Error ? error.message : "Unable to add transaction. Please try again.",
         type: "error"
       });
-    } finally {
-      setIsSubmitting(false);
     }
+  }
+
+  function applyJob(job: FinanceJob) {
+    if (Array.isArray(job.data)) return;
+    const { amount, ...savedForm } = job.data;
+    setForm({ ...savedForm, amount: 0 });
+    setAmountInput(String(amount));
+    setFeedback({ message: "Job data applied to the form.", type: "success" });
+    amountInputRef.current?.focus();
   }
 
   return (
     <section className="page-view finance-page page-view--active">
       <section className="panel finance-panel">
+        <JobQueue jobs={jobs} kind="single" onApply={applyJob} />
         <form id={FINANCE_FORM_ID} className="finance-form" onSubmit={onSubmit} noValidate>
           <label className="finance-field finance-field--amount">
             <span>Amount</span>
@@ -370,9 +371,7 @@ export function FinancePage({ iframeName }: FinancePageProps) {
             </button>
           </div>
         ) : null}
-        <button className="finance-submit" type="submit" form={FINANCE_FORM_ID} disabled={isSubmitting}>
-          {isSubmitting ? "Saving..." : "Save Transaction"}
-        </button>
+        <button className="finance-submit" type="submit" form={FINANCE_FORM_ID}>Save Transaction</button>
       </div>
     </section>
   );

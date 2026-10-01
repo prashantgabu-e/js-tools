@@ -1,6 +1,8 @@
 import { Menu } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AuthGate } from "./components/AuthGate";
+import { JobQueueButton } from "./components/JobQueue";
+import { JobQueueProvider } from "./contexts/JobQueueContext";
 import { Topbar } from "./components/Topbar";
 import { BottomNavigation, Sidebar } from "./components/Sidebar";
 import { PAGE_COPY, ROUTE_HASHES } from "./constants";
@@ -67,15 +69,17 @@ export function App() {
         <div className="app-shell">
           <Sidebar activeView={currentView} isOpen={isSidebarOpen} onNavigate={() => setIsSidebarOpen(false)} />
 
+          <JobQueueProvider>
           <main className="main">
-            <Topbar eyebrow={copy.eyebrow} title={copy.title} mobileMenuButton={mobileMenuButton} actions={logoutButton} />
+            <Topbar eyebrow={copy.eyebrow} title={copy.title} mobileMenuButton={mobileMenuButton} actions={<><JobQueueButton />{logoutButton}</>} />
             <div key={currentView}>
               {currentView === "sms-analyzer" ? <SmsAnalyzerPage /> : null}
-              {currentView === "finance" ? <FinancePage iframeName="financeSubmitFrame" /> : null}
-              {currentView === "bulk-finance" ? <BulkFinancePage iframeName="financeSubmitFrame" /> : null}
+              {currentView === "finance" ? <FinancePage /> : null}
+              {currentView === "bulk-finance" ? <BulkFinancePage /> : null}
             </div>
             <iframe id="financeSubmitFrame" name="financeSubmitFrame" title="Finance submission handler" hidden />
           </main>
+          </JobQueueProvider>
           <BottomNavigation activeView={currentView} onNavigate={() => setIsSidebarOpen(false)} />
         </div>
       )}

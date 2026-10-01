@@ -29,6 +29,18 @@ export interface FinancePayload {
   entrySource: "Website";
 }
 
+export type FinanceJobKind = "single" | "bulk";
+export type FinanceJobStatus = "queued" | "running" | "completed" | "failed";
+
+export interface FinanceJob {
+  id: string;
+  kind: FinanceJobKind;
+  data: FinancePayload | FinancePayload[];
+  status: FinanceJobStatus;
+  createdAt: string;
+  error?: string;
+}
+
 export interface FinanceResponse {
   success?: boolean;
   message?: string;

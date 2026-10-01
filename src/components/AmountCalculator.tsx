@@ -1,4 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import type { KeyboardEvent } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Calculator, X } from "lucide-react";
 
 type Operator = "+" | "-" | "*" | "/";
@@ -119,6 +121,7 @@ export function AmountCalculator({ value, onApply, buttonClassName }: AmountCalc
   const [currentValue, setCurrentValue] = useState("");
   const [result, setResult] = useState("");
   const [error, setError] = useState("");
+  const calculatorInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!isOpen) {
@@ -130,6 +133,12 @@ export function AmountCalculator({ value, onApply, buttonClassName }: AmountCalc
     setResult("");
     setError("");
   }, [isOpen, value]);
+
+  useLayoutEffect(() => {
+    if (isOpen) {
+      calculatorInputRef.current?.focus();
+    }
+  }, [isOpen]);
 
   const formulaText = useMemo(() => {
     const parts = [...tokens.map(tokenText), currentValue].filter(Boolean);
@@ -276,6 +285,33 @@ export function AmountCalculator({ value, onApply, buttonClassName }: AmountCalc
     inputOperator(label as Operator);
   }
 
+  function handleCalculatorKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    const { key } = event;
+
+    if (/^\d$/.test(key) || key === "." || ["+", "-", "*", "/", "%"].includes(key)) {
+      event.preventDefault();
+      handleButton(key);
+      return;
+    }
+
+    if (key === "Enter" || key === "=") {
+      event.preventDefault();
+      calculate();
+      return;
+    }
+
+    if (key === "Backspace") {
+      event.preventDefault();
+      deleteLast();
+      return;
+    }
+
+    if (key === "Escape") {
+      event.preventDefault();
+      setIsOpen(false);
+    }
+  }
+
   return (
     <>
       <button
@@ -288,7 +324,8 @@ export function AmountCalculator({ value, onApply, buttonClassName }: AmountCalc
         <Calculator className="icon" aria-hidden="true" />
       </button>
 
-      {isOpen ? (
+      {isOpen
+        ? createPortal(
         <div className="amount-calculator-overlay" role="presentation">
           <section className="amount-calculator" role="dialog" aria-modal="true" aria-labelledby="amountCalculatorTitle">
             <div className="amount-calculator__header">
@@ -304,7 +341,16 @@ export function AmountCalculator({ value, onApply, buttonClassName }: AmountCalc
             </div>
 
             <div className="amount-calculator__display" aria-live="polite">
-              <div className="amount-calculator__formula">{formulaText}</div>
+              <input
+                ref={calculatorInputRef}
+                className="amount-calculator__formula"
+                type="text"
+                value={formulaText}
+                readOnly
+                autoFocus
+                aria-label="Calculator entry"
+                onKeyDown={handleCalculatorKeyDown}
+              />
               <div className={`amount-calculator__result${error ? " is-error" : ""}`}>{error || (result ? `= ${result}` : "")}</div>
             </div>
 
@@ -323,7 +369,8 @@ export function AmountCalculator({ value, onApply, buttonClassName }: AmountCalc
             </div>
           </section>
         </div>
-      ) : null}
+        , document.body)
+        : null}
     </>
   );
 }
